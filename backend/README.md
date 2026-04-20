@@ -11,7 +11,7 @@ Alert orchestration service for SOS events.
 
 ## Run
 ```bash
-cd /home/runner/work/RakshaNet-AI/RakshaNet-AI/backend
+cd backend
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 src/server.py
 ```

@@ -17,12 +17,16 @@
   <body>
     <h1>RakshaNet Incident Console</h1>
     <p class="muted">Prototype: incident timeline + helper routing status</p>
+    <p class="muted">Set <code>window.RAKSHANET_API_BASE</code> before this script loads to override API endpoint.</p>
 
     <button id="refresh">Refresh Incidents</button>
     <div id="incidents"></div>
 
     <script>
-      const API_BASE = 'http://localhost:8080';
+      const inferredBase = window.location.hostname
+        ? `${window.location.protocol}//${window.location.hostname}:8080`
+        : 'http://localhost:8080';
+      const API_BASE = window.RAKSHANET_API_BASE || inferredBase;
       const incidentsEl = document.getElementById('incidents');
 
       function render(incidents) {

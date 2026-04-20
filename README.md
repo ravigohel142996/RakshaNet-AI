@@ -17,7 +17,7 @@ Offline Emergency Safety Network for Rural India
 
 ## Quick start (backend)
 ```bash
-cd /home/runner/work/RakshaNet-AI/RakshaNet-AI/backend
+cd backend
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 src/server.py
 ```

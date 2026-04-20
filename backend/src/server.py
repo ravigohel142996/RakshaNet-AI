@@ -1,11 +1,13 @@
 import json
 import math
+import os
 import uuid
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 INCIDENTS = {}
+INCIDENT_ORDER = []
 HELPERS = [
     {"id": "helper-1", "name": "ASHA Worker 1", "lat": 23.0225, "lng": 72.5714},
     {"id": "helper-2", "name": "Police Post A", "lat": 23.0300, "lng": 72.5800},
@@ -45,9 +47,15 @@ class Handler(BaseHTTPRequestHandler):
         body = json.dumps(payload).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
+        self.send_header("Access-Control-Allow-Origin", os.getenv("RAKSHANET_ALLOWED_ORIGIN", "*"))
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+
+    def do_OPTIONS(self):
+        self._send_json(200, {"status": "ok"})
 
     def do_GET(self):
         parsed = urlparse(self.path)
@@ -55,8 +63,21 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(200, {"status": "ok"})
 
         if parsed.path == "/api/v1/incidents":
-            incidents = sorted(INCIDENTS.values(), key=lambda x: x["created_at"], reverse=True)
-            return self._send_json(200, {"incidents": incidents})
+            query = parse_qs(parsed.query)
+            try:
+                limit = min(max(int(query.get("limit", ["50"])[0]), 1), 500)
+                offset = max(int(query.get("offset", ["0"])[0]), 0)
+            except ValueError:
+                return self._send_json(400, {"error": "invalid_pagination"})
+            incident_ids = INCIDENT_ORDER[offset : offset + limit]
+            incidents = [INCIDENTS[incident_id] for incident_id in incident_ids]
+            return self._send_json(
+                200,
+                {
+                    "incidents": incidents,
+                    "pagination": {"offset": offset, "limit": limit, "total": len(INCIDENT_ORDER)},
+                },
+            )
 
         if parsed.path.startswith("/api/v1/incidents/"):
             incident_id = parsed.path.split("/")[-1]
@@ -104,12 +125,15 @@ class Handler(BaseHTTPRequestHandler):
             "created_at": datetime.now(timezone.utc).isoformat(),
         }
         INCIDENTS[incident_id] = incident
+        INCIDENT_ORDER.insert(0, incident_id)
         return self._send_json(201, incident)
 
 
 def run():
-    server = HTTPServer(("0.0.0.0", 8080), Handler)
-    print("RakshaNet backend running on http://0.0.0.0:8080")
+    host = os.getenv("RAKSHANET_HOST", "127.0.0.1")
+    port = int(os.getenv("RAKSHANET_PORT", "8080"))
+    server = HTTPServer((host, port), Handler)
+    print(f"RakshaNet backend running on http://{host}:{port}")
     server.serve_forever()
 
 
