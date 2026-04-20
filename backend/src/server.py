@@ -121,14 +121,20 @@ class Handler(BaseHTTPRequestHandler):
         if missing:
             return self._send_json(400, {"error": "missing_fields", "fields": missing})
 
+        try:
+            lat = float(payload["lat"])
+            lng = float(payload["lng"])
+        except (TypeError, ValueError):
+            return self._send_json(400, {"error": "invalid_coordinates"})
+
         incident_id = str(uuid.uuid4())
-        helper = nearest_helper(float(payload["lat"]), float(payload["lng"]))
+        helper = nearest_helper(lat, lng)
 
         incident = {
             "incident_id": incident_id,
             "band_id": payload["band_id"],
-            "lat": payload["lat"],
-            "lng": payload["lng"],
+            "lat": lat,
+            "lng": lng,
             "pole_id": payload.get("pole_id", "nearest-pole"),
             "status": "triggered",
             "actions": [

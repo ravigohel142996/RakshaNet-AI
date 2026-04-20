@@ -23,10 +23,10 @@
     <div id="incidents"></div>
 
     <script>
-      const apiPortValue = window.RAKSHANET_API_PORT || '8080';
+      const apiPort = window.RAKSHANET_API_PORT || '8080';
       const inferredBase = window.location.hostname
-        ? `${window.location.protocol}//${window.location.hostname}:${apiPortValue}`
-        : `http://localhost:${apiPortValue}`;
+        ? `${window.location.protocol}//${window.location.hostname}:${apiPort}`
+        : `http://localhost:${apiPort}`;
       const API_BASE = window.RAKSHANET_API_BASE || inferredBase;
       const incidentsEl = document.getElementById('incidents');
 

@@ -22,7 +22,8 @@ void triggerAlarm() {
 }
 
 void updateAlarm() {
-  if (alarmActive && millis() - alarmStart >= ALARM_DURATION_MS) {
+  unsigned long now = millis();
+  if (alarmActive && (unsigned long)(now - alarmStart) >= ALARM_DURATION_MS) {
     alarmActive = false;
     digitalWrite(SIREN_PIN, LOW);
     digitalWrite(STROBE_PIN, LOW);
