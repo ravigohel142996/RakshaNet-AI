@@ -3,9 +3,10 @@
 
 const int SOS_BUTTON_PIN = 2;
 const int LED_PIN = 13;
-const unsigned long DEBOUNCE_MS = 60;
-bool lastStableState = HIGH;
-unsigned long lastStateChangeAt = 0;
+const unsigned long BUTTON_DEBOUNCE_MS = 60;
+bool lastRawState = HIGH;
+bool stableButtonState = HIGH;
+unsigned long lastDebounceAt = 0;
 
 void setup() {
   pinMode(SOS_BUTTON_PIN, INPUT_PULLUP);
@@ -24,12 +25,14 @@ void loop() {
   bool rawState = digitalRead(SOS_BUTTON_PIN);
   unsigned long now = millis();
 
-  if (rawState != lastStableState && (now - lastStateChangeAt) >= DEBOUNCE_MS) {
-    lastStableState = rawState;
-    lastStateChangeAt = now;
-    if (lastStableState == LOW) {
-      triggerSOS();
-    }
+  if (rawState != lastRawState) {
+    lastRawState = rawState;
+    lastDebounceAt = now;
+  }
+
+  if ((now - lastDebounceAt) >= BUTTON_DEBOUNCE_MS && stableButtonState != rawState) {
+    stableButtonState = rawState;
+    if (stableButtonState == LOW) triggerSOS();
   }
 
   delay(50);

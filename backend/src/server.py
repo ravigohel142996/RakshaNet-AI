@@ -11,6 +11,9 @@ INCIDENT_ORDER = []
 MIN_PAGE_LIMIT = 1
 MAX_PAGE_LIMIT = 500
 DEFAULT_PAGE_LIMIT = 50
+DEFAULT_ALLOWED_ORIGIN = "http://localhost:8080"
+DEFAULT_BIND_HOST = "127.0.0.1"
+DEFAULT_BIND_PORT = 8080
 HELPERS = [
     {"id": "helper-1", "name": "ASHA Worker 1", "lat": 23.0225, "lng": 72.5714},
     {"id": "helper-2", "name": "Police Post A", "lat": 23.0300, "lng": 72.5800},
@@ -50,7 +53,10 @@ class Handler(BaseHTTPRequestHandler):
         body = json.dumps(payload).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
-        self.send_header("Access-Control-Allow-Origin", os.getenv("RAKSHANET_ALLOWED_ORIGIN", "*"))
+        self.send_header(
+            "Access-Control-Allow-Origin",
+            os.getenv("RAKSHANET_ALLOWED_ORIGIN", DEFAULT_ALLOWED_ORIGIN),
+        )
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.send_header("Content-Length", str(len(body)))
@@ -136,10 +142,14 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def run():
-    host = os.getenv("RAKSHANET_HOST", "127.0.0.1")
-    port = int(os.getenv("RAKSHANET_PORT", "8080"))
+    host = os.getenv("RAKSHANET_HOST", DEFAULT_BIND_HOST)
+    port = int(os.getenv("RAKSHANET_PORT", str(DEFAULT_BIND_PORT)))
     server = HTTPServer((host, port), Handler)
     print(f"RakshaNet backend running on http://{host}:{port}")
+    print(
+        "Use RAKSHANET_HOST=0.0.0.0 and explicit RAKSHANET_ALLOWED_ORIGIN "
+        "for controlled multi-device/network deployment."
+    )
     server.serve_forever()
 
 

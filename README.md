@@ -23,3 +23,4 @@ python3 src/server.py
 ```
 
 Service runs at `http://localhost:8080`.
+For network-accessible pilots, explicitly set `RAKSHANET_HOST=0.0.0.0` and `RAKSHANET_ALLOWED_ORIGIN=<trusted-origin>`.
