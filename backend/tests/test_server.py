@@ -1,6 +1,6 @@
 import unittest
 
-from src.server import haversine_km, nearest_helper
+from src.server import HELPERS, haversine_km, nearest_helper
 
 
 class TestServerLogic(unittest.TestCase):
@@ -12,6 +12,17 @@ class TestServerLogic(unittest.TestCase):
         self.assertIn("id", helper)
         self.assertIn("name", helper)
         self.assertIn("distance_km", helper)
+
+    def test_nearest_helper_is_closest(self):
+        lat, lng = 23.02, 72.57
+        helper = nearest_helper(lat, lng)
+        expected = min(
+            HELPERS,
+            key=lambda candidate: haversine_km(lat, lng, candidate["lat"], candidate["lng"]),
+        )
+        expected_distance = round(haversine_km(lat, lng, expected["lat"], expected["lng"]), 2)
+        self.assertEqual(helper["id"], expected["id"])
+        self.assertEqual(helper["distance_km"], expected_distance)
 
 
 if __name__ == "__main__":

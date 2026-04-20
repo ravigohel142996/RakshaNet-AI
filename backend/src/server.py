@@ -8,6 +8,9 @@ from urllib.parse import parse_qs, urlparse
 
 INCIDENTS = {}
 INCIDENT_ORDER = []
+MIN_PAGE_LIMIT = 1
+MAX_PAGE_LIMIT = 500
+DEFAULT_PAGE_LIMIT = 50
 HELPERS = [
     {"id": "helper-1", "name": "ASHA Worker 1", "lat": 23.0225, "lng": 72.5714},
     {"id": "helper-2", "name": "Police Post A", "lat": 23.0300, "lng": 72.5800},
@@ -65,7 +68,10 @@ class Handler(BaseHTTPRequestHandler):
         if parsed.path == "/api/v1/incidents":
             query = parse_qs(parsed.query)
             try:
-                limit = min(max(int(query.get("limit", ["50"])[0]), 1), 500)
+                limit = min(
+                    max(int(query.get("limit", [str(DEFAULT_PAGE_LIMIT)])[0]), MIN_PAGE_LIMIT),
+                    MAX_PAGE_LIMIT,
+                )
                 offset = max(int(query.get("offset", ["0"])[0]), 0)
             except ValueError:
                 return self._send_json(400, {"error": "invalid_pagination"})

@@ -23,9 +23,10 @@
     <div id="incidents"></div>
 
     <script>
+      const defaultPort = window.RAKSHANET_API_PORT || '8080';
       const inferredBase = window.location.hostname
-        ? `${window.location.protocol}//${window.location.hostname}:8080`
-        : 'http://localhost:8080';
+        ? `${window.location.protocol}//${window.location.hostname}:${defaultPort}`
+        : `http://localhost:${defaultPort}`;
       const API_BASE = window.RAKSHANET_API_BASE || inferredBase;
       const incidentsEl = document.getElementById('incidents');
 
