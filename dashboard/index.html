@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RakshaNet Ops Dashboard</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 24px; }
+      h1 { margin-bottom: 4px; }
+      .muted { color: #666; margin-top: 0; }
+      .card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin: 12px 0; }
+      .status { font-weight: bold; color: #b30000; }
+      button { padding: 8px 12px; cursor: pointer; }
+      code { background: #f4f4f4; padding: 2px 4px; }
+    </style>
+  </head>
+  <body>
+    <h1>RakshaNet Incident Console</h1>
+    <p class="muted">Prototype: incident timeline + helper routing status</p>
+    <p class="muted">Set <code>window.RAKSHANET_API_BASE</code> before this script loads to override API endpoint.</p>
+
+    <button id="refresh">Refresh Incidents</button>
+    <div id="incidents"></div>
+
+    <script>
+      const apiPort = window.RAKSHANET_API_PORT || '8080';
+      const inferredBase = window.location.hostname
+        ? `${window.location.protocol}//${window.location.hostname}:${apiPort}`
+        : `http://localhost:${apiPort}`;
+      const API_BASE = window.RAKSHANET_API_BASE || inferredBase;
+      const incidentsEl = document.getElementById('incidents');
+
+      function render(incidents) {
+        incidentsEl.innerHTML = '';
+        if (!incidents.length) {
+          incidentsEl.innerHTML = '<p>No incidents yet.</p>';
+          return;
+        }
+
+        incidents.forEach((incident) => {
+          const div = document.createElement('div');
+          div.className = 'card';
+          div.innerHTML = `
+            <div><strong>ID:</strong> <code>${incident.incident_id}</code></div>
+            <div><strong>Band:</strong> ${incident.band_id}</div>
+            <div><strong>Location:</strong> ${incident.lat}, ${incident.lng}</div>
+            <div><strong>Status:</strong> <span class="status">${incident.status}</span></div>
+            <div><strong>Nearest Helper:</strong> ${incident.nearest_helper.name} (${incident.nearest_helper.distance_km} km)</div>
+            <div><strong>Actions:</strong> ${incident.actions.join(', ')}</div>
+            <div><strong>Created:</strong> ${incident.created_at}</div>
+          `;
+          incidentsEl.appendChild(div);
+        });
+      }
+
+      async function loadIncidents() {
+        try {
+          const res = await fetch(`${API_BASE}/api/v1/incidents`);
+          const data = await res.json();
+          render(data.incidents || []);
+        } catch (err) {
+          incidentsEl.innerHTML = `<p>Unable to load incidents. Ensure backend is running at <code>${API_BASE}</code>.</p>`;
+        }
+      }
+
+      document.getElementById('refresh').addEventListener('click', loadIncidents);
+      loadIncidents();
+    </script>
+  </body>
+</html>
