@@ -34,6 +34,4 @@ void loop() {
     stableButtonState = rawState;
     if (stableButtonState == LOW) triggerSOS();
   }
-
-  delay(50);
 }

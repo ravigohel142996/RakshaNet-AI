@@ -32,5 +32,4 @@ void updateAlarm() {
 void loop() {
   // TODO: if LoRa SOS packet received -> triggerAlarm() and escalate over GSM
   updateAlarm();
-  delay(100);
 }
