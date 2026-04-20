@@ -7,6 +7,7 @@ const unsigned long BUTTON_DEBOUNCE_MS = 60;
 bool lastRawState = HIGH;
 bool stableButtonState = HIGH;
 unsigned long lastDebounceAt = 0;
+unsigned long ledOffAt = 0;
 
 void setup() {
   pinMode(SOS_BUTTON_PIN, INPUT_PULLUP);
@@ -16,9 +17,8 @@ void setup() {
 
 void triggerSOS() {
   digitalWrite(LED_PIN, HIGH);
+  ledOffAt = millis() + 500;
   // TODO: build and send SOS payload: band_id, timestamp, gps, battery
-  delay(500);
-  digitalWrite(LED_PIN, LOW);
 }
 
 void loop() {
@@ -33,5 +33,10 @@ void loop() {
   if ((now - lastDebounceAt) >= BUTTON_DEBOUNCE_MS && stableButtonState != rawState) {
     stableButtonState = rawState;
     if (stableButtonState == LOW) triggerSOS();
+  }
+
+  if (ledOffAt > 0 && now >= ledOffAt) {
+    digitalWrite(LED_PIN, LOW);
+    ledOffAt = 0;
   }
 }

@@ -6,6 +6,8 @@ from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs, urlparse
 
+# Prototype-only in-memory incident storage.
+# Replace with persistent storage (e.g., PostgreSQL) for production deployments.
 INCIDENTS = {}
 INCIDENT_ORDER = []
 MIN_PAGE_LIMIT = 1
@@ -14,6 +16,8 @@ DEFAULT_PAGE_LIMIT = 50
 DEFAULT_ALLOWED_ORIGIN = "http://localhost"
 DEFAULT_BIND_HOST = "127.0.0.1"
 DEFAULT_BIND_PORT = 8080
+# Prototype helper catalog.
+# For production, load responders from deployment-specific configuration/database.
 HELPERS = [
     {"id": "helper-1", "name": "ASHA Worker 1", "lat": 23.0225, "lng": 72.5714},
     {"id": "helper-2", "name": "Police Post A", "lat": 23.0300, "lng": 72.5800},
